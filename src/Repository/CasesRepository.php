@@ -19,22 +19,19 @@ class CasesRepository extends ServiceEntityRepository
         parent::__construct($registry, Cases::class);
     }
 
-    // /**
-    //  * @return Cases[] Returns an array of Cases objects
-    //  */
-    /*
-    public function findByExampleField($value)
+     /**
+      * @return Cases[] Returns an array of Cases objects
+      */
+
+    public function findAllCases()
     {
         return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('c.id', 'ASC')
             ->setMaxResults(10)
             ->getQuery()
-            ->getResult()
+            ->getArrayResult()
         ;
     }
-    */
+
 
     /*
     public function findOneBySomeField($value): ?Cases

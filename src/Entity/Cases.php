@@ -2,11 +2,12 @@
 
 namespace App\Entity;
 
-use App\Repository\CasesRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass=CasesRepository::class)
+ * @ORM\Entity()
  */
 class Cases
 {
@@ -28,9 +29,31 @@ class Cases
     private $name;
 
     /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Files", mappedBy="case", cascade={"persist", "remove", "merge"}, orphanRemoval=true)
+     */
+    public $files;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Types", inversedBy="cases")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $casesType;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Status", inversedBy="cases")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $status;
+
+    /**
      * @ORM\Column(type="datetime")
      */
     private $limitDate;
+
+    public function __construct()
+    {
+        $this->files = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -72,4 +95,60 @@ class Cases
 
         return $this;
     }
+
+    /**
+     * @return Collection|Files[]
+     */
+    public function getFiles(): Collection
+    {
+        return $this->files;
+    }
+
+    public function addFile(Files $file): self
+    {
+        if (!$this->files->contains($file)) {
+            $this->files[] = $file;
+            $file->setCase($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFile(Files $file): self
+    {
+        if ($this->files->removeElement($file)) {
+            // set the owning side to null (unless already changed)
+            if ($file->getCase() === $this) {
+                $file->setCase(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getCasesType(): ?Types
+    {
+        return $this->casesType;
+    }
+
+    public function setCasesType(?Types $casesType): self
+    {
+        $this->casesType = $casesType;
+
+        return $this;
+    }
+
+    public function getStatus(): ?Status
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?Status $status): self
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+
 }

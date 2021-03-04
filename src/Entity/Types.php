@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity()
  */
-class Status
+class Types
 {
     /**
      * @ORM\Id
@@ -23,9 +23,8 @@ class Status
      */
     private $slug;
 
-
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Cases", mappedBy="status", cascade={"persist", "remove", "merge"}, orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="App\Entity\Cases", mappedBy="casesType", cascade={"persist", "remove", "merge"}, orphanRemoval=true)
      */
     public $cases;
 
@@ -63,7 +62,7 @@ class Status
     {
         if (!$this->cases->contains($case)) {
             $this->cases[] = $case;
-            $case->setStatus($this);
+            $case->setCasesType($this);
         }
 
         return $this;
@@ -73,18 +72,18 @@ class Status
     {
         if ($this->cases->removeElement($case)) {
             // set the owning side to null (unless already changed)
-            if ($case->getStatus() === $this) {
-                $case->setStatus(null);
+            if ($case->getCasesType() === $this) {
+                $case->setCasesType(null);
             }
         }
 
         return $this;
     }
 
-
     public function __toString()
     {
         return $this->slug;
     }
+
 
 }

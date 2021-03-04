@@ -3,9 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\Cases;
+use App\Entity\Files;
 use App\Form\CasesType;
 use App\Repository\CasesRepository;
+use Doctrine\ORM\Repository\RepositoryFactory;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -18,10 +22,10 @@ class CasesController extends AbstractController
     /**
      * @Route("/", name="cases_index", methods={"GET"})
      */
-    public function index(CasesRepository $casesRepository): Response
+    public function index(): Response
     {
         return $this->render('cases/index.html.twig', [
-            'cases' => $casesRepository->findAll(),
+            'cases' => $this->getDoctrine()->getRepository(Cases::class)->findAll(),
         ]);
     }
 
@@ -35,6 +39,24 @@ class CasesController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+            $files = $form->get('files')->getData();
+            /**
+             * @var UploadedFile $file
+             */
+            foreach($files as $file){
+                $uploadesFileName = md5(uniqid()) . '.' . $file->getClientOriginalExtension();
+                $directory = $this->getParameter('files_directory');
+                $file->move(
+                    $directory,
+                    $uploadesFileName
+                );
+
+                $uploadesFile = new Files();
+                $uploadesFile->setName($uploadesFileName);
+                $uploadesFile->setLocation($directory.'/'.$uploadesFileName);
+                $case->addFile($uploadesFile);
+            }
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($case);
             $entityManager->flush();
@@ -90,5 +112,14 @@ class CasesController extends AbstractController
         }
 
         return $this->redirectToRoute('cases_index');
+    }
+
+    /**
+     * @Route("/datatable/ajax", name="cases_ajax", methods={"GET"})
+     */
+    public function getCasesJSON(CasesRepository $casesRepository)
+    {
+        $cases= $casesRepository->findAllCases();
+        return new JsonResponse(["data" =>$cases]);
     }
 }

@@ -2,11 +2,10 @@
 
 namespace App\Entity;
 
-use App\Repository\FilesRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass=FilesRepository::class)
+ * @ORM\Entity()
  */
 class Files
 {
@@ -22,10 +21,17 @@ class Files
      */
     private $name;
 
+
     /**
      * @ORM\Column(type="string", length=255)
      */
     private $location;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Cases", inversedBy="files")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $case;
 
     public function getId(): ?int
     {
@@ -55,4 +61,18 @@ class Files
 
         return $this;
     }
+
+    public function getCase(): ?Cases
+    {
+        return $this->case;
+    }
+
+    public function setCase(?Cases $case): self
+    {
+        $this->case = $case;
+
+        return $this;
+    }
+
+
 }
