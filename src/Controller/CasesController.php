@@ -117,9 +117,17 @@ class CasesController extends AbstractController
     /**
      * @Route("/datatable/ajax", name="cases_ajax", methods={"GET"})
      */
-    public function getCasesJSON(CasesRepository $casesRepository)
+    public function getCasesJSON(CasesRepository $casesRepository,Request $request)
     {
-        $cases= $casesRepository->findAllCases();
+        $search = $request->get('search');
+        if(isset($search['value']) and $search['value'] != ''){
+            $cases= $casesRepository->findAllCases($search['value']);
+
+        }
+        else{
+            $cases= $casesRepository->findAllCases();
+        }
+
         return new JsonResponse(["data" =>$cases]);
     }
 }

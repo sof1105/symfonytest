@@ -23,12 +23,30 @@ class CasesRepository extends ServiceEntityRepository
       * @return Cases[] Returns an array of Cases objects
       */
 
-    public function findAllCases()
+    public function findAllCases($searchValue = null)
     {
-        return $this->createQueryBuilder('c')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getArrayResult()
+        $qb = $this->createQueryBuilder('c')
+            ->select('c.id,c.reference,c.name,c.limitDate,status.slug as case_status,cases_type.slug as type')
+            ->leftJoin('c.status','status')
+            ->leftJoin('c.casesType','cases_type');
+
+        if($searchValue != null){
+
+            $qb->where($qb->expr()->like('c.reference',':name'))
+                ->orWhere($qb->expr()->like('c.reference',':name'))
+                ->orWhere($qb->expr()->like('c.name',':name'))
+                ->orWhere($qb->expr()->like('c.limitDate',':name'))
+                ->orWhere($qb->expr()->like('status.slug',':name'))
+                ->orWhere($qb->expr()->like('cases_type.slug',':name'))
+                ->setParameter('name', '%'.$searchValue.'%')
+
+                ;
+        }
+
+        $data = $qb->getQuery()
+            ->getArrayResult();
+
+        return $data;
         ;
     }
 
